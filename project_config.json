@@ -1,0 +1,31 @@
+{
+    "STACK_NAME": "personalize-api",
+    "REGION": "us-west-2",
+    "APIS":
+        {
+            "recommend": {
+                "CAMPAIN_ARN": "arn:aws:personalize:us-west-2:625806755153:campaign/personalize-anime-userpersonalization",
+                "API_NAME": "recommend"
+            },
+            "sims": {
+                "CAMPAIN_ARN": "arn:aws:personalize:us-west-2:625806755153:campaign/personalize-anime-SIMS",
+                "API_NAME": "sims"
+            },
+            "rerank": {
+                "CAMPAIN_ARN": "arn:aws:personalize:us-west-2:625806755153:campaign/personalize-anime-rerank",
+                "API_NAME": "rerank"
+            }
+        },
+    "EVENT_TRACKERS": {
+        "eventtracker":{
+            "TRACKING_ID": "d8cfa64d-a100-4922-9a75-01306c7a0d54",
+            "API_NAME": "eventtracker"
+        } 
+
+    },
+    "RESOURCE_TAGS": {
+        "APLICACION": "personalize-api",
+        "AMBIENTE": "dev",
+        "GROUP": "poc-madness"
+    }
+}
