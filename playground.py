@@ -1,5 +1,8 @@
 #%%
 import boto3
+import time
+import uuid
+import json
 from configure import ( 
     APIS, 
     REGION,
@@ -14,10 +17,10 @@ personalize = boto3.client('personalize')
 personalize_runtime = boto3.client('personalize-runtime', region_name=REGION)
 
 # Establish a connection to Personalize's event streaming
-personalize_events = boto3.client(service_name='personalize-events')
+personalize_events = boto3.client(service_name='personalize-events', region_name=REGION)
 
 # %%
-EVENT_TRACKER, APIS
+EVENT_TRACKERS
 # %%
 
 get_recommendations_response = personalize_runtime.get_recommendations(
@@ -43,11 +46,33 @@ get_recommendations_response = personalize_runtime.get_personalized_ranking(
     inputList= ['3000', '3001', '2500']
 )
 get_recommendations_response
+
+#%%
+
+event = {
+"itemId": '16300',
+}
+event_json = json.dumps(event)
+
+
+put_event_response = personalize_events.put_events(
+trackingId = EVENT_TRACKERS['eventtracker']['TRACKING_ID'],
+userId= '10000',
+sessionId = str(uuid.uuid1()),
+eventList = [{
+    'sentAt': int(time.time()),
+    'eventType': 'RATING',
+    'eventValue': 9,
+    'properties': event_json
+    }]
+)
+
+put_event_response
+#%%
+str(uuid.uuid1())
 # %%
-BASE_ENV_VARIABLES
+str(uuid.uuid4())
 # %%
-R = APIS['recommend']['CAMPAIN_ARN'].split(':')
-R.pop()
-# %%
-':'.join(R) + ':filter/*'
+import json
+json.loads('{"itemId": "16300",\n    "eventType: "RATING",\n    "eventValue": "1",\n    "sessionId": "10000"\n}')
 # %%

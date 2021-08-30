@@ -19,7 +19,10 @@
     "EVENT_TRACKERS": {
         "eventtracker":{
             "TRACKING_ID": "d8cfa64d-a100-4922-9a75-01306c7a0d54",
-            "API_NAME": "eventtracker"
+            "TRACKER_ARN": "arn:aws:personalize:us-west-2:625806755153:event-tracker/d2e0162e",
+            "API_NAME": "eventtracker",
+            "DEFAULT_EVENT_TYPE": "RATING",
+            "DEFAULT_EVENT_VALUE": "9"
         } 
 
     },

@@ -14,10 +14,10 @@ def lambda_handler(event, context):
 
     pathParameters = event['pathParameters']
 
-    if not 'clientId' in pathParameters:
-        return build_response(500, 'Falata clientId')
+    if not 'userId' in pathParameters:
+        return build_response(500, 'Falta userId')
 
-    clientId = pathParameters['clientId']
+    userId = pathParameters['userId']
     
     filter_arn = None
 
@@ -35,10 +35,10 @@ def lambda_handler(event, context):
     try:
         args = dict(
             campaignArn = CAMPAIN_ARN,
-            userId = str(clientId)
+            userId = str(userId)
         )
         if filter_arn:
-            args = dict(campaignArn = CAMPAIN_ARN, userId = str(clientId), filterArn = filter_arn)
+            args = dict(campaignArn = CAMPAIN_ARN, userId = str(userId), filterArn = filter_arn)
         get_recommendations_response = personalize_runtime.get_recommendations(
             **args)
         print (get_recommendations_response)

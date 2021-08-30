@@ -24,11 +24,7 @@ class ApiPersonalize(core.Construct):
     def __init__(self, scope: core.Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-                #"personalize:GetRecommendations",
-                #"personalize:GetPersonalizedRanking"
-
         base_api = aws_apigateway.RestApi( self, 'personalize')
-
 
         if "recommend" in APIS:
             if (APIS['recommend'] !={}) and (APIS['recommend'] is not None):
@@ -36,43 +32,13 @@ class ApiPersonalize(core.Construct):
             # ** --------------------------------
             # ** RECOMENDADOR DE PRODUCTOS
             # ** --------------------------------
-
-                REC_CAMPAIN_ARN = APIS['recommend']['CAMPAIN_ARN']
-                parts = REC_CAMPAIN_ARN.split(':')
-                parts.pop()
-                FILTERS_ARN = ':'.join(parts) + ':filter/*'
-
-
-                recommend_lambda = aws_lambda.Function(
-                    self, "recommend",handler="lambda_function.lambda_handler",
-                    code=aws_lambda.Code.asset("./lambdas/recommend"),**PYTHON_LAMBDA_CONFIG, 
-                    environment=json.loads(json.dumps(dict(
-                        CAMPAIN_ARN =REC_CAMPAIN_ARN,
-                        **BASE_ENV_VARIABLES)))
-                )
-
-                recommend_lambda.add_to_role_policy(
-                    aws_iam.PolicyStatement(
-                        actions=["personalize:GetRecommendations"], 
-                        resources=[REC_CAMPAIN_ARN, FILTERS_ARN]))
-                
-                
-                recommend_api = base_api.root.add_resource(APIS['recommend']['API_NAME'])
-
-                resource_recommend = recommend_api.add_resource('{clientId}')
-                resource_recommend.add_method(
-                    'GET', aws_apigateway.LambdaIntegration(recommend_lambda,**BASE_INTEGRATION_CONFIG), 
-                    **BASE_METHOD_RESPONSE
-                )                
-                resource_recommend.add_method(
-                    'POST', aws_apigateway.LambdaIntegration(recommend_lambda,**BASE_INTEGRATION_CONFIG), 
-                    **BASE_METHOD_RESPONSE
-                )
-                
-                self.add_cors_options(resource_recommend)
-
-                core.CfnOutput(self, 'recommendations',value=resource_recommend.url)
-
+                self.make_resource(
+                    base_api = base_api, 
+                    api_data = APIS['recommend'], 
+                    resource_name = '{userId}', 
+                    methods = ['GET', 'POST'], 
+                    backend_code = aws_lambda.Code.asset("./lambdas/recommend")
+                ) 
 
         if "sims" in APIS:
             if (APIS['sims'] !={}) and (APIS['sims'] is not None):
@@ -81,41 +47,13 @@ class ApiPersonalize(core.Construct):
             # ** SIMILAR ITEMS
             # ** --------------------------------
 
-                SIMS_CAMPAIN_ARN = APIS['sims']['CAMPAIN_ARN']
-                parts = SIMS_CAMPAIN_ARN.split(':')
-                parts.pop()
-                FILTERS_ARN = ':'.join(parts) + ':filter/*'
-
-                sims_lambda = aws_lambda.Function(
-                    self, "sims_lambda",handler="lambda_function.lambda_handler",
-                    code=aws_lambda.Code.asset("./lambdas/sims"),**PYTHON_LAMBDA_CONFIG, 
-                    environment=json.loads(json.dumps(dict(
-                        CAMPAIN_ARN =SIMS_CAMPAIN_ARN,
-                        **BASE_ENV_VARIABLES)))
-                )
-
-                sims_lambda.add_to_role_policy(
-                    aws_iam.PolicyStatement(
-                        actions=["personalize:GetRecommendations"], 
-                        resources=[SIMS_CAMPAIN_ARN, FILTERS_ARN]))
-                
-                
-                sims_api = base_api.root.add_resource(APIS['sims']['API_NAME'])
-
-                resource_sims = sims_api.add_resource('{itemId}')
-                resource_sims.add_method(
-                    'GET', aws_apigateway.LambdaIntegration(sims_lambda,**BASE_INTEGRATION_CONFIG), 
-                    **BASE_METHOD_RESPONSE
-                )
-                resource_sims.add_method(
-                    'POST', aws_apigateway.LambdaIntegration(sims_lambda,**BASE_INTEGRATION_CONFIG), 
-                    **BASE_METHOD_RESPONSE
-                )
-                
-                self.add_cors_options(resource_sims)
-
-                core.CfnOutput(self, 'sims',value=resource_sims.url)
-
+                self.make_resource(
+                    base_api = base_api, 
+                    api_data = APIS['sims'], 
+                    resource_name = '{itemId}', 
+                    methods = ['GET', 'POST'], 
+                    backend_code = aws_lambda.Code.asset("./lambdas/sims")
+                ) 
 
         if "rerank" in APIS:
             if (APIS['rerank'] !={}) and (APIS['rerank'] is not None):
@@ -124,37 +62,90 @@ class ApiPersonalize(core.Construct):
             # ** RERANKING
             # ** --------------------------------
 
-                RERANK_CAMPAIN_ARN = APIS['rerank']['CAMPAIN_ARN']
-                parts = RERANK_CAMPAIN_ARN.split(':')
-                parts.pop()
-                FILTERS_ARN = ':'.join(parts) + ':filter/*'
+                self.make_resource(
+                    base_api = base_api, 
+                    api_data = APIS['rerank'], 
+                    resource_name = '{userId}', 
+                    methods = ['POST'], 
+                    backend_code = aws_lambda.Code.asset("./lambdas/rerank")
+                )    
+
+        if len(EVENT_TRACKERS):
+
+            # ** --------------------------------
+            # ** EVENT TRACKERS
+            # ** --------------------------------
+
+            for et in EVENT_TRACKERS.keys():
+                et_data = EVENT_TRACKERS[et]
+                self.make_event_tracker(
+                    base_api = base_api, 
+                    api_data = et_data, 
+                    resource_name = '{userId}',  
+                    backend_code = aws_lambda.Code.asset("./lambdas/tracker")
+                ) 
+
+    def make_event_tracker(self, base_api, api_data, resource_name, backend_code):
+
+        lambda_backend = aws_lambda.Function(
+            self,api_data['API_NAME'] + "_lambda" ,handler="lambda_function.lambda_handler",
+            code=backend_code,**PYTHON_LAMBDA_CONFIG, 
+            environment=json.loads(json.dumps(dict(
+                TRACKING_ID =api_data['TRACKING_ID'],
+                DEFAULT_EVENT_TYPE = api_data['DEFAULT_EVENT_TYPE'],
+                DEFAULT_EVENT_VALUE = api_data['DEFAULT_EVENT_VALUE'],
+                **BASE_ENV_VARIABLES)))
+        )
+
+        lambda_backend.add_to_role_policy(
+            aws_iam.PolicyStatement(
+                actions=["personalize:PutEvents"], 
+                resources=['*']))
+
+        new_api = base_api.root.add_resource(api_data['API_NAME'])
+        new_resource = new_api.add_resource(resource_name)
+
+        new_resource.add_method(
+            'POST' , aws_apigateway.LambdaIntegration(lambda_backend,**BASE_INTEGRATION_CONFIG), 
+            **BASE_METHOD_RESPONSE
+        )
+        
+        self.add_cors_options(new_resource)
+
+        core.CfnOutput(self, api_data['API_NAME'] + "_out",value=new_resource.url)
 
 
-                rerank_lambda = aws_lambda.Function(
-                    self, "rerank_lambda",handler="lambda_function.lambda_handler",
-                    code=aws_lambda.Code.asset("./lambdas/rerank"),**PYTHON_LAMBDA_CONFIG, 
-                    environment=json.loads(json.dumps(dict(
-                        CAMPAIN_ARN =RERANK_CAMPAIN_ARN,
-                        **BASE_ENV_VARIABLES)))
-                )
+    def make_resource(self, base_api, api_data,resource_name, methods, backend_code):
+        CAMPAIN_ARN = api_data['CAMPAIN_ARN']
+        parts = CAMPAIN_ARN.split(':')
+        parts.pop()
+        FILTERS_ARN = ':'.join(parts) + ':filter/*'
 
-                rerank_lambda.add_to_role_policy(
-                    aws_iam.PolicyStatement(
-                        actions=["personalize:GetPersonalizedRanking"], 
-                        resources=[RERANK_CAMPAIN_ARN, FILTERS_ARN]))
-                
-                
-                rerank_api = base_api.root.add_resource(APIS['rerank']['API_NAME'])
-                resource_rerank = rerank_api.add_resource('{userId}')
+        lambda_backend = aws_lambda.Function(
+            self,api_data['API_NAME'] + "_lambda" ,handler="lambda_function.lambda_handler",
+            code=backend_code,**PYTHON_LAMBDA_CONFIG, 
+            environment=json.loads(json.dumps(dict(
+                CAMPAIN_ARN =CAMPAIN_ARN,
+                **BASE_ENV_VARIABLES)))
+        )
 
-                resource_rerank.add_method(
-                    'POST', aws_apigateway.LambdaIntegration(rerank_lambda,**BASE_INTEGRATION_CONFIG), 
-                    **BASE_METHOD_RESPONSE
-                )
-                
-                self.add_cors_options(resource_rerank)
+        lambda_backend.add_to_role_policy(
+            aws_iam.PolicyStatement(
+                actions=["personalize:GetPersonalizedRanking", "personalize:GetRecommendations"], 
+                resources=[CAMPAIN_ARN, FILTERS_ARN]))
 
-                core.CfnOutput(self, 'rerank',value=resource_rerank.url)
+        new_api = base_api.root.add_resource(api_data['API_NAME'])
+        new_resource = new_api.add_resource(resource_name)
+
+        for m in methods:
+            new_resource.add_method(
+                m , aws_apigateway.LambdaIntegration(lambda_backend,**BASE_INTEGRATION_CONFIG), 
+                **BASE_METHOD_RESPONSE
+            )
+        
+        self.add_cors_options(new_resource)
+
+        core.CfnOutput(self, api_data['API_NAME'] + "_out",value=new_resource.url)
 
     def add_cors_options(self, apigw_resource):
         apigw_resource.add_method(
