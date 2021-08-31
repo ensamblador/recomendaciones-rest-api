@@ -33,7 +33,7 @@ Para desplegar el proyecto necesitamos cdk instalado:
 Nota: para validar que esté correctamente instalado cdk ejecutar en un terminal `cdk --version` y debería ver la versión:
 
 ```zsh
-$ cdk --version
+cdk --version
 1.120.0 (build 6c15150)
 ```
 
@@ -45,7 +45,7 @@ $ cdk --version
 Clonamos el [repo](https://github.com/ensamblador/recomendaciones-rest-api.git) del proyecto:
 
 ```zsh
-$ git clone https://github.com/ensamblador/recomendaciones-rest-api.git
+git clone https://github.com/ensamblador/recomendaciones-rest-api.git
 
 Cloning into 'recomendaciones-rest-api'...
 remote: Enumerating objects: 42, done.
@@ -54,7 +54,7 @@ remote: Compressing objects: 100% (28/28), done.
 remote: Total 42 (delta 12), reused 39 (delta 9), pack-reused 0
 Unpacking objects: 100% (42/42), done.
 
-$ cd recomendaciones-rest-api
+cd recomendaciones-rest-api
 ```
 
 ### 1.3 Creamos el ambiente virtual e instalamos dependencias
@@ -62,9 +62,9 @@ $ cd recomendaciones-rest-api
 Para crear un ambiente virtual ejecutamos el comando `python3 -m venv .venv` dentro de la carpeta del proyecto. Esto nos servirá para instalar las librerías necesarias de python en ese ambiente. Luego lo activamos con `source .venv/bin/activate`, e instalamos los paquetes con el comando `pip install -r requirements.txt`:
 
 ```zsh
-$ python3 -m venv .venv
-$ source .venv/bin/activate
-$ pip install -r requirements.txt
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 ```
 
 ### 1.4 Editar archivo `project_config.json` 
@@ -146,7 +146,7 @@ $cdk diff --profile <profile-name>
 Luego para desplegar el proyecto ejecutamos (nos solicitará aprobación para crear los roles y permisos IAM)
 
 ```zsh
-$ cdk deploy 
+cdk deploy 
 ```
 
 Una vez finalizado nos entregará los outputs con las URL de las API Rest que ha creado:
@@ -370,7 +370,7 @@ Nota: la interaccion se almacena con el timestamp cuando se invoca la API.
 Para limpiar y eliminar todos los recursos creados por este proyecto ejecutamos :
 
 ```zsh
-$ cdk destroy 
+cdk destroy 
 ```
 
 Alternativamente, ir a la consola de **cloudformation** seleccionar el stack con el nombre <STACK_NAME> y hacer click **Delete** y confirmar.
