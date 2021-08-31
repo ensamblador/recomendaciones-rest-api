@@ -94,34 +94,34 @@ Las secciones del archivo de configuración son:
 ```json
 {
     ...
-        "APIS": (definiciones de apis de recomendaciones, similar items y rerank)
+        "APIS": <definiciones de apis de recomendaciones, similar items y rerank>
         {
-            "recommend": (definicion para campaña de recomendaciones)
+            "recommend": <definicion para campaña de recomendaciones>
             {
                 "CAMPAIN_ARN": "arn:aws:personalize:<region>:<account>:campaign/<cmpain-name>",
-                "API_NAME": "recommend" (nombre de la api para API Gateway)
+                "API_NAME": "recommend" <nombre de la api para API Gateway>
             },
             "sims": 
-            (definicion para campaña sims)
+            <definicion para campaña sims>
             {
                 "CAMPAIN_ARN": "arn:aws:personalize:<region>:<account>:campaign/<cmpain-name>",
                 "API_NAME": "sims" 
             },
             "rerank": 
-            (definicion para campaña de rerank)
+            <definicion para campaña de rerank>
             {
                 "CAMPAIN_ARN": "arn:aws:personalize:<region>:<account>:campaign/<cmpain-name>",
                 "API_NAME": "rerank"
             }
         },
     "EVENT_TRACKERS": 
-    (definiciones para cada event tracker)
+    <definiciones para cada event tracker, si es que hay>
     {
         "eventtracker":{
-            "TRACKING_ID": (tracking ID del event tracker),
-            "API_NAME": "eventtracker", (api name para despliegue en API Gateway)
-            "DEFAULT_EVENT_TYPE": "RATING", (Event type por defecto)
-            "DEFAULT_EVENT_VALUE": "9" (event value por defecto)
+            "TRACKING_ID": <tracking ID del event tracker>,
+            "API_NAME": "eventtracker", <api name para despliegue en API Gateway>
+            "DEFAULT_EVENT_TYPE": "RATING", <Event type por defecto>
+            "DEFAULT_EVENT_VALUE": "9" <event value por defecto>
         } 
 
     }
