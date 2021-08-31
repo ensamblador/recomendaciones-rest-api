@@ -174,7 +174,7 @@ Request:
  [GET/POST] https://<url>/prod/sims/1000
 ```
 Respuesta:
-```json
+```
 {
     "data": {
         "ResponseMetadata": {
@@ -207,11 +207,11 @@ Recomienda 25 items para el usuario = userId
 Ejemplo recomendaciones para el usuario userId = 300
 
 Request:
-```web
+```
 Request: [GET/POST] https://<url>/prod/recommend/300
 ```
 Respuesta:
-```json
+```
 {
     "data": {
         "ResponseMetadata": {
@@ -240,7 +240,7 @@ Reordena items para un usuario según orden de recomendación
 Ejemplo: ordernar los items ["3000", "3001", "2500"] para el usuario userId = 300
 
 Request:
-```web
+```
 [POST] https://<url>/prod/rerank/300
 body : 
 {
@@ -248,7 +248,7 @@ body :
 }
 ```
 Respuesta:
-```json
+```
 {
     "data": {
         "ResponseMetadata": {
@@ -282,15 +282,15 @@ Recomienda 25 items para el usuario = userId pero solo que cumplan con filterArn
 Ejemplo recomendaciones para el usuario userId = 300 aplicando el filtro categoría herramientas
 
 Request:
-```web
-Request: [POST] https://<url>/prod/recommend/300
+```
+[POST] https://<url>/prod/recommend/300
 body : 
 {
     "filterArn": "arn:aws:personalize:<region>:<account>:filter/herramientas"
 }
 ```
 Respuesta:
-```json
+```
 {
     "data": {
         "ResponseMetadata": {
@@ -333,8 +333,8 @@ body
 
 Ejemplo: Usuario userId = 20000 califica con nota = 9 una serie itemId = 199. 
 
-equest:
-```web
+request:
+```
 POST https://<url>/prod/eventtracker/20000
 body : 
 {
@@ -345,7 +345,7 @@ body :
 }
 ```
 Respuesta:
-```json
+```
 {
     "data": {
         "ResponseMetadata": {
