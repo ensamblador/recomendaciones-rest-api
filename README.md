@@ -65,7 +65,7 @@ Para crear un ambiente virtual ejecutamos el comando `python3 -m venv .venv` den
 $ python3 -m venv .venv
 $ source .venv/bin/activate
 $ pip install -r requirements.txt
-````
+```
 
 ### 1.4 Editar archivo `project_config.json` 
 
@@ -74,7 +74,7 @@ En este archivo definimos las api que se desplegarán y los ARN de las campañas
 Las secciones del archivo de configuración son:
 
 #### Deployment config
-```json 
+```
  {
     "STACK_NAME": (nombre del stack cloudformation),
     "REGION": (region de despliegue, misma de personalize),
@@ -91,7 +91,7 @@ Las secciones del archivo de configuración son:
 
 #### Personalize Data
 
-```json
+```
 {
     ...
         "APIS": <definiciones de apis de recomendaciones, similar items y rerank>
