@@ -3,7 +3,7 @@
 
 El objetivo de este proyecto es un despliegue rápido de una API RESTfull para invocar las campañas de Amazon Personalize. Esto lo haremos con Cloud Development Kit (CDK) en Python.
 
-Este proyecto está pensado para ser utilizado tal cual (as-is) para probar las predicciones de Amazon Personalize utilizando API Gateway y Lambda.
+Este proyecto está tal cual (as-is) para probar las predicciones de Amazon Personalize utilizando API Gateway y Lambda.
 
 ## Arquitectura 
 
