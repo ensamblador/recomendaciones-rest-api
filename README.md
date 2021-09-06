@@ -124,8 +124,11 @@ Las secciones del archivo de configuración son:
             "DEFAULT_EVENT_VALUE": "9" <event value por defecto>
         } 
 
-    }
+    },
+    "FILTERS": [
+        { "name": "<nombre del filtro>", "filterArn": "ARN del filtro"},
     ...
+    ]
 }
 ```
 
@@ -171,7 +174,9 @@ Ejemplo, obtener items similares al item itemId = 1000
 
 Request:
 ```
- [GET/POST] https://<url>/prod/sims/1000
+ [GET] https://<url>/prod/sims/1000
+ Opcional filter y numResults
+ [GET] https://<url>/prod/sims/1000?filter=Drama&numResults=10
 ```
 Respuesta:
 ```
@@ -202,13 +207,17 @@ Respuesta:
 
 ### 2.2 Recomendación a usuarios
 
-Recomienda 25 items para el usuario = userId
+Recomienda items para el usuario = userId
 
 Ejemplo recomendaciones para el usuario userId = 300
 
 Request:
 ```
-Request: [GET/POST] https://<url>/prod/recommend/300
+[GET] https://<url>/prod/recommend/300
+
+Opcional filter y numResults
+[GET] https://<url>/prod/recommend/300?filter=Drama&numResults=10
+
 ```
 Respuesta:
 ```
@@ -241,11 +250,10 @@ Ejemplo: ordernar los items ["3000", "3001", "2500"] para el usuario userId = 30
 
 Request:
 ```
-[POST] https://<url>/prod/rerank/300
-body : 
-{
-    "inputList": ["3000", "3001", "2500"]
-}
+[GET] https://<url>/prod/rerank/300?inputList=3000,3001,2500
+
+Opcional filter y numResults
+[GET] https://<url>/prod/rerank/300?inputList=3000,3001,2500&filter=Drama&numResults=10
 ```
 Respuesta:
 ```
@@ -275,19 +283,17 @@ Respuesta:
 
 ## 2.4 Uso de filtros en las consultas
 
-Para usar filtros ya creados en Amazon Personalize utilizamos el metodo POST de la API y pasarmos filterArn en el body:
+Para usar filtros ya creados en Amazon Personalize utilizamos filter en la consulta:
 
-Recomienda 25 items para el usuario = userId pero solo que cumplan con filterArn (puede ser una categoría o condición que está definida previamente en el filtro)
 
-Ejemplo recomendaciones para el usuario userId = 300 aplicando el filtro categoría herramientas
+
+Recomienda 25 items para el usuario = userId pero solo que cumplan con filtro (debe ser una categoría o condición que está definida previamente en el filtro)
+
+Ejemplo recomendaciones para el usuario userId = 300 aplicando el filtro categoría herramientas. Debe existir un filtro creado llamado `herramientas` configurado en `project_config.json`
 
 Request:
 ```
-[POST] https://<url>/prod/recommend/300
-body : 
-{
-    "filterArn": "arn:aws:personalize:<region>:<account>:filter/herramientas"
-}
+[GET] https://<url>/prod/recommend/300?filter=herramientas
 ```
 Respuesta:
 ```

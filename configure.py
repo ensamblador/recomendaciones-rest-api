@@ -14,6 +14,7 @@ TAGS = config['RESOURCE_TAGS']
 REGION = config['REGION']
 APIS = config['APIS']
 EVENT_TRACKERS = config['EVENT_TRACKERS']
+FILTERS =  config['FILTERS']
 
 BASE_LAMBDA_CONFIG = dict (
     timeout=core.Duration.seconds(20),       
@@ -23,7 +24,8 @@ BASE_LAMBDA_CONFIG = dict (
 PYTHON_LAMBDA_CONFIG = dict (runtime=aws_lambda.Runtime.PYTHON_3_8, **BASE_LAMBDA_CONFIG)
 
 
-BASE_ENV_VARIABLES = dict (REGION= REGION)
+
+BASE_ENV_VARIABLES = dict (REGION= REGION, FILTERS = json.dumps(FILTERS))
 
 BASE_INTEGRATION_CONFIG =  dict(proxy=True,
     integration_responses=[{

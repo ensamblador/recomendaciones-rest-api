@@ -36,7 +36,7 @@ class ApiPersonalize(core.Construct):
                     base_api = base_api, 
                     api_data = APIS['recommend'], 
                     resource_name = '{userId}', 
-                    methods = ['GET', 'POST'], 
+                    methods = ['GET'], 
                     backend_code = aws_lambda.Code.asset("./lambdas/recommend")
                 ) 
 
@@ -51,7 +51,7 @@ class ApiPersonalize(core.Construct):
                     base_api = base_api, 
                     api_data = APIS['sims'], 
                     resource_name = '{itemId}', 
-                    methods = ['GET', 'POST'], 
+                    methods = ['GET'], 
                     backend_code = aws_lambda.Code.asset("./lambdas/sims")
                 ) 
 
@@ -66,7 +66,7 @@ class ApiPersonalize(core.Construct):
                     base_api = base_api, 
                     api_data = APIS['rerank'], 
                     resource_name = '{userId}', 
-                    methods = ['POST'], 
+                    methods = ['GET'], 
                     backend_code = aws_lambda.Code.asset("./lambdas/rerank")
                 )    
 

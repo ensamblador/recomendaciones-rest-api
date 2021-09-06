@@ -23,9 +23,19 @@
             "API_NAME": "eventtracker",
             "DEFAULT_EVENT_TYPE": "RATING",
             "DEFAULT_EVENT_VALUE": "9"
-        } 
-
+        }
     },
+    "FILTERS": [
+        { "name": "Action", "filterArn": "arn:aws:personalize:us-west-2:625806755153:filter/Action"},
+        { "name": "Adventure", "filterArn": "arn:aws:personalize:us-west-2:625806755153:filter/Adventure"},
+        { "name": "Comedy","filterArn": "arn:aws:personalize:us-west-2:625806755153:filter/Comedy"},
+        { "name": "Drama","filterArn": "arn:aws:personalize:us-west-2:625806755153:filter/Drama"},
+        { "name": "Fantasy", "filterArn": "arn:aws:personalize:us-west-2:625806755153:filter/Fantasy"},
+        { "name": "Kids", "filterArn": "arn:aws:personalize:us-west-2:625806755153:filter/Kids"},
+        { "name": "Music", "filterArn": "arn:aws:personalize:us-west-2:625806755153:filter/Music"},
+        { "name": "Sci-Fi","filterArn": "arn:aws:personalize:us-west-2:625806755153:filter/Sci-Fi"},
+        { "name": "Shounen","filterArn": "arn:aws:personalize:us-west-2:625806755153:filter/Shounen"}
+    ],
     "RESOURCE_TAGS": {
         "APLICACION": "personalize-api",
         "AMBIENTE": "dev",
