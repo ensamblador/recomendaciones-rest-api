@@ -26,37 +26,36 @@ class ApiPersonalize(core.Construct):
 
         base_api = aws_apigateway.RestApi( self, 'personalize')
 
-        if "recommend" in APIS:
-            if (APIS['recommend'] !={}) and (APIS['recommend'] is not None):
+        for api in APIS:
+            if api['CAMPAIGN_TYPE'] == 'recommend':
 
-            # ** --------------------------------
-            # ** RECOMENDADOR DE PRODUCTOS
-            # ** --------------------------------
+                # ** --------------------------------
+                # ** RECOMENDADOR DE PRODUCTOS
+                # ** --------------------------------
+                
                 self.make_resource(
                     base_api = base_api, 
-                    api_data = APIS['recommend'], 
+                    api_data = api, 
                     resource_name = '{userId}', 
                     methods = ['GET'], 
                     backend_code = aws_lambda.Code.asset("./lambdas/recommend")
                 ) 
 
-        if "sims" in APIS:
-            if (APIS['sims'] !={}) and (APIS['sims'] is not None):
+            if api['CAMPAIGN_TYPE'] == 'sims':
 
-            # ** --------------------------------
-            # ** SIMILAR ITEMS
-            # ** --------------------------------
+                # ** --------------------------------
+                # ** SIMILAR ITEMS
+                # ** --------------------------------
 
                 self.make_resource(
                     base_api = base_api, 
-                    api_data = APIS['sims'], 
+                    api_data = api, 
                     resource_name = '{itemId}', 
                     methods = ['GET'], 
                     backend_code = aws_lambda.Code.asset("./lambdas/sims")
                 ) 
 
-        if "rerank" in APIS:
-            if (APIS['rerank'] !={}) and (APIS['rerank'] is not None):
+            if api['CAMPAIGN_TYPE'] == 'rerank':
 
             # ** --------------------------------
             # ** RERANKING
@@ -64,7 +63,7 @@ class ApiPersonalize(core.Construct):
 
                 self.make_resource(
                     base_api = base_api, 
-                    api_data = APIS['rerank'], 
+                    api_data = api, 
                     resource_name = '{userId}', 
                     methods = ['GET'], 
                     backend_code = aws_lambda.Code.asset("./lambdas/rerank")
@@ -76,8 +75,7 @@ class ApiPersonalize(core.Construct):
             # ** EVENT TRACKERS
             # ** --------------------------------
 
-            for et in EVENT_TRACKERS.keys():
-                et_data = EVENT_TRACKERS[et]
+            for et_data in EVENT_TRACKERS:
                 self.make_event_tracker(
                     base_api = base_api, 
                     api_data = et_data, 
@@ -86,14 +84,11 @@ class ApiPersonalize(core.Construct):
                 ) 
 
     def make_event_tracker(self, base_api, api_data, resource_name, backend_code):
-
         lambda_backend = aws_lambda.Function(
             self,api_data['API_NAME'] + "_lambda" ,handler="lambda_function.lambda_handler",
             code=backend_code,**PYTHON_LAMBDA_CONFIG, 
             environment=json.loads(json.dumps(dict(
                 TRACKING_ID =api_data['TRACKING_ID'],
-                DEFAULT_EVENT_TYPE = api_data['DEFAULT_EVENT_TYPE'],
-                DEFAULT_EVENT_VALUE = api_data['DEFAULT_EVENT_VALUE'],
                 **BASE_ENV_VARIABLES)))
         )
 
@@ -114,9 +109,8 @@ class ApiPersonalize(core.Construct):
 
         core.CfnOutput(self, api_data['API_NAME'] + "_out",value=new_resource.url)
 
-
     def make_resource(self, base_api, api_data,resource_name, methods, backend_code):
-        CAMPAIN_ARN = api_data['CAMPAIN_ARN']
+        CAMPAIN_ARN = api_data['CAMPAIGN_ARN']
         parts = CAMPAIN_ARN.split(':')
         parts.pop()
         FILTERS_ARN = ':'.join(parts) + ':filter/*'

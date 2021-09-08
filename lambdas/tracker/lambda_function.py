@@ -9,8 +9,6 @@ from botocore.exceptions import ClientError
 def lambda_handler(event, context):
     REGION =os.environ.get('REGION')
     TRACKING_ID = os.environ.get('TRACKING_ID')
-    DEFAULT_EVENT_VALUE = os.environ.get('DEFAULT_EVENT_VALUE')
-    DEFAULT_EVENT_TYPE = os.environ.get('DEFAULT_EVENT_TYPE')
     print (event)
     # ** --------------------------------
     # ** REGISTRAR EVENTO NUEVO
@@ -32,14 +30,10 @@ def lambda_handler(event, context):
 
     itemId = body['itemId']
 
-    eventType = DEFAULT_EVENT_TYPE
-    eventValue = DEFAULT_EVENT_VALUE
-    
-    if 'eventType' in body: 
-        eventType = body['eventType']
+     
+    eventType = body['eventType'] if 'eventType' in body else None
+    eventValue = body['eventValue'] if 'eventValue'  in body else None
 
-    if 'eventValue'  in body:
-        eventValue = body['eventValue']
     
     if 'sessionId' in body:
         sessionId = body['sessionId']
@@ -49,19 +43,24 @@ def lambda_handler(event, context):
     
     personalize_events = boto3.client(service_name='personalize-events', region_name=REGION)
 
+    the_event = {
+        'sentAt': int(time.time()),
+        'properties': json.dumps({"itemId": str(itemId)})
+    }
+
+    if eventType:
+        the_event['eventType'] = eventType
+    
+    if eventValue:
+        the_event['eventValue'] = eventValue
+
+    
     try:
         args = dict(
             trackingId = TRACKING_ID,
             userId= userId,
             sessionId = sessionId,
-            eventList = [
-                {
-                    'sentAt': int(time.time()),
-                    'eventType': eventType,
-                    'eventValue': eventValue,
-                    'properties': json.dumps({"itemId": str(itemId)})
-                }
-            ]
+            eventList = [the_event]
         )
         put_event_response = personalize_events.put_events(**args)
 

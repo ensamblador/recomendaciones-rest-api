@@ -76,3 +76,114 @@ str(uuid.uuid4())
 import json
 json.loads('{"itemId": "16300",\n    "eventType: "RATING",\n    "eventValue": "1",\n    "sessionId": "10000"\n}')
 # %%
+import boto3
+client = boto3.client('sts')
+# %%
+client.get_caller_identity()
+# %%
+personalize_client = boto3.client('personalize', region_name='us-west-2')
+# %%
+personalize_client.list_campaigns()['campaigns']
+# %%
+#personalize_client.list_event_trackers(datasetGroupArn='arn:aws:personalize:us-west-2:625806755153:dataset-group/personalize-anime')['eventTrackers']
+personalize_client.describe_event_tracker(
+    eventTrackerArn='arn:aws:personalize:us-west-2:625806755153:event-tracker/d2e0162e'
+)['eventTracker']
+# %%
+personalize_client.list_dataset_groups()
+# %%
+def get_personalize_event_trackers(client):
+    dsgs = client.list_dataset_groups()['datasetGroups']
+    dsg_arns = []
+    for dsg in dsgs:
+        if dsg['status'] == 'ACTIVE':
+            dsg_arns.append(dsg['datasetGroupArn'])
+    
+    event_trackers = []
+    for dsg_arn in dsg_arns:
+        e_trackers = client.list_event_trackers(datasetGroupArn=dsg_arn)['eventTrackers']
+        for et in e_trackers:
+            if et['status'] == 'ACTIVE':
+                details = client.describe_event_tracker(eventTrackerArn=et['eventTrackerArn'])['eventTracker']
+                event_trackers.append({
+                    'name': et['name'], 
+                    'arn':et['eventTrackerArn'],
+                    'trackingId': details['trackingId']
+                    })
+
+    return event_trackers
+
+get_personalize_event_trackers(personalize_client)
+# %%
+def get_personalize_filters(client):
+    dsgs = client.list_dataset_groups()['datasetGroups']
+    dsg_arns = []
+    for dsg in dsgs:
+        if dsg['status'] == 'ACTIVE':
+            dsg_arns.append(dsg['datasetGroupArn'])
+    
+    filters = []
+    for dsg_arn in dsg_arns:
+        ffilters = client.list_filters(datasetGroupArn=dsg_arn)['Filters']
+        for ffilter in ffilters:
+            if ffilter['status'] == 'ACTIVE':
+                filters.append({'name': ffilter['name'], 'arn':ffilter['filterArn']})
+
+    return filters
+
+get_personalize_filters(personalize_client)
+
+#%%
+personalize_client.list_recipes()['recipes']
+
+# %%
+personalize_client.describe_campaign(campaignArn='arn:aws:personalize:us-west-2:625806755153:campaign/personalize-anime-SIMS')['campaign']
+# %%
+personalize_client.describe_solution_version(solutionVersionArn='arn:aws:personalize:us-west-2:625806755153:solution/personalize-anime-sims/4a25f136')['solutionVersion']
+# %%
+def get_personalize_campains(client):
+    campaigns = client.list_campaigns()['campaigns']
+    camps = []
+    for c in campaigns:
+        if c['status'] == 'ACTIVE':
+            details = client.describe_campaign(campaignArn=c['campaignArn'])['campaign']
+            solution_version_arn = details['solutionVersionArn']
+            solution_details = client.describe_solution_version(solutionVersionArn=solution_version_arn)['solutionVersion']
+            recipe_arn = solution_details['recipeArn']
+            camps.append({
+                'name': c['name'],
+                'arn': c['campaignArn'],
+                'recipe': recipe_arn.split('/')[-1]
+            })
+    return camps
+# %%
+campanas = get_personalize_campains(personalize_client)
+# %%
+campanas
+# %%
+APIS = []
+for c in campanas:
+    if 'sims' in c['recipe']:
+        c['type'] = 'sims'
+    elif 'ranking' in c['recipe']:
+        c['type'] = 'rerank'
+    elif ('user-personalization' in c['recipe']) or ('hrnn' in c['recipe']) or ('popularity-count' in c['recipe']):
+        c['type'] = 'recommend'
+
+    APIS.append({
+        'CAMPAIGN_ARN': c['arn'],
+        'API_NAME': c['name'].lower(),
+        'CAMPAIGN_TYPE': c['type']
+    })
+APIS
+# %%
+import boto3
+account_id = boto3.client('sts').get_caller_identity()['Account']
+account_id_anonymized = '******'+str(account_id)[6:]
+# %%
+#account_id_anonymized[:6] = '******'
+
+
+# %%
+account_id, account_id_anonymized
+# %%

@@ -5,16 +5,30 @@ from  aws_cdk import (
     aws_lambda
 )
 
-from utils import load_config
+from utils import load_config,save_config,  load_personalize_resources
+
+
+
 
 config = load_config('project_config.json')
 
 STACK_NAME = config['STACK_NAME']
 TAGS = config['RESOURCE_TAGS']
 REGION = config['REGION']
-APIS = config['APIS']
-EVENT_TRACKERS = config['EVENT_TRACKERS']
-FILTERS =  config['FILTERS']
+USE_ACCOUNT_PERSONALIZE_RESOURCES = config['USE_ACCOUNT_PERSONALIZE_RESOURCES']
+
+if USE_ACCOUNT_PERSONALIZE_RESOURCES:
+    ACCOUNT_RESOURCES = load_personalize_resources(REGION)
+    ACCOUNT_RESOURCES_REAL = ACCOUNT_RESOURCES['REAL_DATA']
+    ACCOUNT_RESOURCES_ANON = ACCOUNT_RESOURCES['ANON_DATA']
+    config['APIS'] = ACCOUNT_RESOURCES_ANON['APIS']
+    config['EVENT_TRACKERS'] = ACCOUNT_RESOURCES_ANON['EVENT_TRACKERS']
+    config['FILTERS'] = ACCOUNT_RESOURCES_ANON['FILTERS']
+    save_config(config, 'project_config.json')
+
+APIS = ACCOUNT_RESOURCES_REAL['APIS']
+EVENT_TRACKERS = ACCOUNT_RESOURCES_REAL['EVENT_TRACKERS']
+FILTERS =  ACCOUNT_RESOURCES_REAL['FILTERS']
 
 BASE_LAMBDA_CONFIG = dict (
     timeout=core.Duration.seconds(20),       

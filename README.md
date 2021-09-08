@@ -38,8 +38,6 @@ cdk --version
 ```
 
 
-
-
 ### 1.2 Clonar repo
 
 Clonamos el [repo](https://github.com/ensamblador/recomendaciones-rest-api.git) del proyecto:
@@ -69,78 +67,45 @@ pip install -r requirements.txt
 
 ### 1.4 Editar archivo `project_config.json` 
 
-En este archivo definimos las api que se desplegarán y los ARN de las campañas asociadas como también los event trackers disponibles:
+En este archivo definimos las api que se desplegarán y los ARN de las campañas asociadas como también los event trackers disponibles.
+
+### 
 
 Las secciones del archivo de configuración son:
 
-#### Deployment config
+|Atributo|Para|
+|:-|:-|
+|STACK_NAME| Nombre del stack en cloudformation|
+|REGION| Region donde se desplegarán los recursos |
+|RESOURCE_TAGS| Tags(Name:Value) aplicados a los recursos|
+|USE_ACCOUNT_PERSONALIZE_RESOURCES| usa automáticamente todas las campañas, event trackers, filtros de la cuenta/region
+
+
+
+#### Ejemplo
 ```
- {
-    "STACK_NAME": (nombre del stack cloudformation),
-    "REGION": (region de despliegue, misma de personalize),
-    ...
-    "RESOURCE_TAGS": { 
-        (diccionario clave / valor con etiquetas para los recursos)
+    "STACK_NAME": "personalize-api",
+    "REGION": "us-west-2",
+    "RESOURCE_TAGS": {
         "APLICACION": "personalize-api",
-        "AMBIENTE": "dev"
-        ... etc
-    }
- }
+        "AMBIENTE": "dev",
+        "GROUP": "poc-madness"
+    },
+    "USE_ACCOUNT_PERSONALIZE_RESOURCES": true,
  ```
 
+***Nota: Si no quisiésemos utilizar todos los recursos de la cuenta, podemos editar las secciones `APIS`, `EVENT_TRACKERS` y `FILTERS` para especificar los datos específicos a utilizar***
 
-#### Personalize Data
-
-```
-{
-    ...
-        "APIS": <definiciones de apis de recomendaciones, similar items y rerank>
-        {
-            "recommend": <definicion para campaña de recomendaciones>
-            {
-                "CAMPAIN_ARN": "arn:aws:personalize:<region>:<account>:campaign/<cmpain-name>",
-                "API_NAME": "recommend" <nombre de la api para API Gateway>
-            },
-            "sims": 
-            <definicion para campaña sims>
-            {
-                "CAMPAIN_ARN": "arn:aws:personalize:<region>:<account>:campaign/<cmpain-name>",
-                "API_NAME": "sims" 
-            },
-            "rerank": 
-            <definicion para campaña de rerank>
-            {
-                "CAMPAIN_ARN": "arn:aws:personalize:<region>:<account>:campaign/<cmpain-name>",
-                "API_NAME": "rerank"
-            }
-        },
-    "EVENT_TRACKERS": 
-    <definiciones para cada event tracker, si es que hay>
-    {
-        "eventtracker":{
-            "TRACKING_ID": <tracking ID del event tracker>,
-            "API_NAME": "eventtracker", <api name para despliegue en API Gateway>
-            "DEFAULT_EVENT_TYPE": "RATING", <Event type por defecto>
-            "DEFAULT_EVENT_VALUE": "9" <event value por defecto>
-        } 
-
-    },
-    "FILTERS": [
-        { "name": "<nombre del filtro>", "filterArn": "ARN del filtro"},
-    ...
-    ]
-}
-```
 
 ### 1.5 Despliegue
 
-Para desplegar el proyecto debemos ejecutar `cdk deploy` no obstante previamente ejecutemos `cdk diff` para revisar las diferencias entre nuestro proyecto local y aws:
+Para desplegar el proyecto debemos ejecutar `cdk deploy` no obstante previamente ejecutemos `cdk diff` para revisar las diferencias entre nuestro proyecto local y el stack de cloudformation de AWS:
 
 ```zsh
 $cdk diff 
 ```
 
-Nota: todos los comandos CDK se ejecutan utilizando el Default Profile de aws cli. Si quisieramos usar un profile en particular debemos agregar `--profile <profile-name>` a los comandos.
+Nota: todos los comandos CDK se ejecutan utilizando el Default Profile de aws command line interface. Si quisieramos usar un profile en particular debemos agregar `--profile <profile-name>` a los comandos.
 
 ```zsh
 $cdk diff --profile <profile-name>
@@ -154,14 +119,18 @@ cdk deploy
 
 Una vez finalizado nos entregará los outputs con las URL de las API Rest que ha creado:
 
+
+#### Ejemplo
+
+
 ```zsh
  ✅  PERSONALIZE-API-CS
 
 Outputs:
-PERSONALIZE-API-CS.apiconstructeventtracker = https://<url>/prod/eventtracker/{userId}
-PERSONALIZE-API-CS.apiconstructrecommend = https://<url>/prod/recommend/{userId}
-PERSONALIZE-API-CS.apiconstructrerank = https://<url>.amazonaws.com/prod/rerank/{userId}
-PERSONALIZE-API-CS.apiconstructsims = https://<url>/prod/sims/{itemId}
+PERSONALIZE-API.trackeroutA29550D8 = https://<base>/animetracker/{userId}
+PERSONALIZE-API.personalizeendpoint458C9821 = https://<base>/personalize-anime-rerank/{userId}
+PERSONALIZE-API.personalizeendoint3DCFE18B = https://<base>/personalize-anime-sims/{itemId}
+PERSONALIZE-API.personalizeendpointE7D20D4F = https://<base>/personalize-anime-userpersonalization/{userId}
 ```
 
 ## 2 Uso de las APIs
@@ -174,9 +143,9 @@ Ejemplo, obtener items similares al item itemId = 1000
 
 Request:
 ```
- [GET] https://<url>/prod/sims/1000
+ [GET] https://<sims-api>/1000
  Opcional filter y numResults
- [GET] https://<url>/prod/sims/1000?filter=Drama&numResults=10
+ [GET] https://<sims-api>/1000?filter=Drama&numResults=10
 ```
 Respuesta:
 ```
@@ -213,10 +182,10 @@ Ejemplo recomendaciones para el usuario userId = 300
 
 Request:
 ```
-[GET] https://<url>/prod/recommend/300
+[GET] https://<user-personalization-api>/300
 
 Opcional filter y numResults
-[GET] https://<url>/prod/recommend/300?filter=Drama&numResults=10
+[GET] https://<user-personalization-api>/300?filter=Drama&numResults=10
 
 ```
 Respuesta:
@@ -250,10 +219,10 @@ Ejemplo: ordernar los items ["3000", "3001", "2500"] para el usuario userId = 30
 
 Request:
 ```
-[GET] https://<url>/prod/rerank/300?inputList=3000,3001,2500
+[GET] https://<rerank-api>/300?inputList=3000,3001,2500
 
 Opcional filter y numResults
-[GET] https://<url>/prod/rerank/300?inputList=3000,3001,2500&filter=Drama&numResults=10
+[GET] https://<rerank-api>/300?inputList=3000,3001,2500&filter=Drama&numResults=10
 ```
 Respuesta:
 ```
@@ -283,17 +252,17 @@ Respuesta:
 
 ## 2.4 Uso de filtros en las consultas
 
-Para usar filtros ya creados en Amazon Personalize utilizamos filter en la consulta:
-
-
+Para usar filtros ya creados en Amazon Personalize utilizamos filter en la consulta.
 
 Recomienda 25 items para el usuario = userId pero solo que cumplan con filtro (debe ser una categoría o condición que está definida previamente en el filtro)
 
-Ejemplo recomendaciones para el usuario userId = 300 aplicando el filtro categoría herramientas. Debe existir un filtro creado llamado `herramientas` configurado en `project_config.json`
+***Nota: El filtro debe existir en personalize y el arn definido en `project_config.json` (si se utiliza la configuración `"USE_ACCOUNT_PERSONALIZE_RESOURCES"=true` se obtienen automáticamente los filtros definidos)***
+
+Ejemplo recomendaciones para el usuario userId = 300 aplicando el filtro categoría herramientas. 
 
 Request:
 ```
-[GET] https://<url>/prod/recommend/300?filter=herramientas
+[GET] https://<user-personalization-api>/300?filter=herramientas
 ```
 Respuesta:
 ```
@@ -324,10 +293,10 @@ Respuesta:
 
 ## 2.5 Actualización de Interacciones
 
-Si se configuró un event tracker en `project_config.json` se generará una API para registrar en Amazon Personalize estas nuevas interacciones.
+Si se configuró un event tracker en `project_config.json` se generará una API para registrar en Amazon Personalize estas nuevas interacciones. Si se utiliza la configuración `"USE_ACCOUNT_PERSONALIZE_RESOURCES"=true` se obtienen los event trackers automáticamente.
 
 ```
-POST https://<url>/prod/eventtracker/{userId}
+POST https://<event-tracker-api>/{userId}
 body 
 {
     "itemId": (id del item con que se interactúa),
@@ -341,7 +310,7 @@ Ejemplo: Usuario userId = 20000 califica con nota = 9 una serie itemId = 199.
 
 request:
 ```
-POST https://<url>/prod/eventtracker/20000
+POST https://<event-tracker-api>/20000
 body : 
 {
     "itemId": "199",
